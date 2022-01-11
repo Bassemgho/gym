@@ -1,12 +1,28 @@
-# CartPole_v1_DDQN
-TensorFlow implementation of a Double Deep Q Network (**DDQN**) solving the problem of balancing a pole on cart.
+# CartPole_v1_DDQN_DQN
+TensorFlow implementation of a Deep Q Network (**DQN**) and Double Deep Q Network (**DDQN**) solving the problem of balancing a pole on cart.
 Environment provided by the OpenAI gym.
 
-## Code
+## Introduction
+This project consists of a pole attached by an un-actuated joint to a cart, which moves along a frictionless track. The pendulum starts upright, and the goal is to prevent it from falling over by increasing and reducing the cart's velocity.
+It's The same environment as CartPole-v0 
 
-### Running
+### Getting Started
+
+* Download the environment from one of the links below. You need only select the environment that matches your operating system:
+
+Linux
+Mac OSX:
+Windows (32-bit) 
+Windows (64-bit)
+(For Windows users) Check out this link if you need help with determining if your computer is running a 32-bit version or 64-bit version of the Windows operating system.
+
+(For AWS) If you'd like to train the agent on AWS (and have not enabled a virtual screen), then please use this link to obtain the environment.
+
+* Place the file in the root folder, and unzip (or decompress) the file.
+
 ```
-python demo.py
+python doube_dqn.py
+python dqn.py
 ```
 
 ### Dependencies
@@ -17,10 +33,9 @@ python demo.py
 *  tensorflow
 
 ## Detailed Description
-### Problem Statement and Environment
-The same environment as CartPole-v0 but now the average number of timesteps is required to be 475.
-
 ---
+### DQN
+The DQN is the algorithm that combines Q-learning with neural networks
 ### DDQN
 DDQN tries to eliminate the inherent problem of DQN - **overestimation**. The way it does it is through using a different 
 target value than DQN. Namely its the following:
