@@ -6,7 +6,7 @@ Environment provided by the OpenAI gym.
 
 ### Running
 ```
-python Main.py
+python demo.py
 ```
 
 ### Dependencies
