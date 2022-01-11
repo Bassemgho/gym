@@ -43,7 +43,7 @@ class DoubleDQNagent :
         self.batch_size = 64
         self.train_start = 1000
         #create model
-        self.model = modelDQN(input_shape=(self.state_size,),action_space=self.action_size)
+        self.model = modelDoubleDQN(input_shape=(self.state_size,),action_space=self.action_size)
         
     def remember(self,state,action,reward,next_state,done):
         self.memory.append((state,action,reward,next_state,done))
