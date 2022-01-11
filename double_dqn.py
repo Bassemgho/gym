@@ -1,191 +1,150 @@
 
-import gym
-from keras.models import Sequential
-from keras.layers import Dense
-from keras.optimizers import Adam
-import numpy as np
+import os
 import random
-from matplotlib import pyplot as plt
+import gym
+from gym.core import ActionWrapper
+from keras.activations import linear
+from keras.backend_config import epsilon
+import numpy as np 
+from collections import deque
+from keras.models import Model,load_model
+from keras.layers import Input,Dense
+from keras.optimizers import adam_v2, rmsprop_v2 
+def modelDQN(input_shape,action_space):
+    X_input = Input(input_shape)
+    # Input Layer of state size(4) and Hidden Layer with 512 nodes
+    layer = Dense(512,input_shape=input_shape,activation="relu",kernel_initializer="he_uniform")(X_input)
+    #Hidden Layer
+    layer = Dense(256,activation="relu",kernel_initializer="he_uniform")(layer)
+    #Hidden Layer
+    layer = Dense(64,activation="relu",kernel_initializer="he_uniform")(layer)
+    #inOutput layer
+    layer = Dense(action_space,activation="linear",kernel_initializer="he_uniform")(layer)
 
-
-# CARTPOLE GAME SETTINGS
-OBSERVATION_SPACE_DIMS = 4
-ACTION_SPACE = [0,1]
-
-# AGENT/NETWORK HYPERPARAMETERS
-EPSILON_INITIAL = 0.5 # exploration rate
-EPSILON_DECAY = 0.99
-EPSILON_MIN = 0.01
-ALPHA = 0.001 # learning rate
-GAMMA = 0.99 # discount factor
-TAU = 0.1 # target network soft update hyperparameter
-EXPERIENCE_REPLAY_BATCH_SIZE = 32
-AGENT_MEMORY_LIMIT = 2000
-MIN_MEMORY_FOR_EXPERIENCE_REPLAY = 500
-
-
-
-def create_dqn():
-    # not actually that deep
-    nn = Sequential()
-    nn.add(Dense(64, input_dim=OBSERVATION_SPACE_DIMS, activation='relu'))
-    nn.add(Dense(64, activation='relu'))
-    nn.add(Dense(len(ACTION_SPACE), activation='linear'))
-    nn.compile(loss='mse', optimizer=Adam(lr=ALPHA))
-    return nn
-                  
-                  
-class DoubleDQNAgent(object):
-
-       
+    model = Model(inputs= X_input,outputs = layer, name="cartepole_dqn")
+    rmsprop_v2.RMSProp
+    #Compiling Model : MSE loss function , Optimizer :RMSprop  , rho :discount factor
+    model.compile(loss="mse",optimizer=rmsprop_v2.RMSProp(lr=0.00025,rho=0.95,epsilon=0.01),metrics=["accuracy"])
+    #model summary
+    model.summary() 
+    return model
+class DQNagent :
     def __init__(self):
-        self.memory = []
-        self.online_network = create_dqn()
-        self.target_network = create_dqn()
-        self.epsilon = EPSILON_INITIAL
-        self.has_talked = False
-    
-    
-    def act(self, state):
-        if self.epsilon > np.random.rand():
-            # explore
-            return np.random.choice(ACTION_SPACE)
-        else:
-            # exploit
-            state = self._reshape_state_for_net(state)
-            q_values = self.online_network.predict(state)[0]
-            return np.argmax(q_values)
+        self.env = gym.make("CartPole-v1")
+        self.state_size = self.env.observation_space.shape[0]
+        self.action_size = self.env.action_space.n
+        self.EPISODES=1000
+        self.memory = deque(maxlen=2000)
+        self.gamma = 0.95 #discount
+        self.epsilon = 1.0 #exploration rate
+        self.epsilon_min = 0.001
+        self.epsilon_decay = 0.999
+        self.batch_size = 64
+        self.train_start = 1000
+        #create model
+        self.model = modelDQN(input_shape=(self.state_size,),action_space=self.action_size)
+        
+    def remember(self,state,action,reward,next_state,done):
+        self.memory.append((state,action,reward,next_state,done))
+        if len(self.memory)>self.train_start :
+            if self.epsilon>self.epsilon_min:
+                #reducing epsilon
+                self.epsilon*=self.epsilon_decay
+    def act(self,state):
+        if np.random.random() <= self.epsilon:
+            #exploration
+            return random.randrange(self.action_size)
+        else :
+            #exploit: using model de predict the best action for the state
+            return np.argmax(self.model.predict(state))
 
+    def replay(self):
+        if len(self.memory)< self.train_start:
+            return
+        #randomly sample minibatch from memory
+        minibatch = random.sample(self.memory,min(len(self.memory),self.batch_size))
+        #initializing state and next state
+        state = np.zeros((self.batch_size, self.state_size))
+        next_state = np.zeros((self.batch_size,self.state_size))
+        action, reward, done = [], [], [] 
 
-    def experience_replay(self):
-
-        minibatch = random.sample(self.memory, EXPERIENCE_REPLAY_BATCH_SIZE)
-        minibatch_new_q_values = []
-
-        for experience in minibatch:
-            state, action, reward, next_state, done = experience
-            state = self._reshape_state_for_net(state)
-            experience_new_q_values = self.online_network.predict(state)[0]
-            if done:
-                q_update = reward
+        #separate states actions and rewards and done from mini batch
+        # to do before prediction 
+        for i in range(self.batch_size):
+            state[i] = minibatch[i][0]
+            action.append(minibatch[i][1])
+            reward.append(minibatch[i][2])
+            next_state[i]= minibatch[i][3]
+            done.append(minibatch[i][4])
+        
+        #define target :predict the action with current state with compiled model without starting to learn (before model.fit  to get the target with initialized values)
+        #batch prediction to save time
+        #value of target is the Q-value of current state
+        
+        target = self.model.predict(state)
+        target_next = self.model.predict(next_state)
+        for i in range(self.batch_size):
+            if done[i]:
+                #Correction of the Q value for the action 
+                target[i][action[i]]=reward[i]
             else:
-                next_state = self._reshape_state_for_net(next_state)
-                # using online network to SELECT action
-                online_net_selected_action = np.argmax(self.online_network.predict(next_state))
-                # using target network to EVALUATE action
-                target_net_evaluated_q_value = self.target_network.predict(next_state)[0][online_net_selected_action]
-                q_update = reward + GAMMA * target_net_evaluated_q_value
-            experience_new_q_values[action] = q_update
-            minibatch_new_q_values.append(experience_new_q_values)
-        minibatch_states = np.array([e[0] for e in minibatch])
-        minibatch_new_q_values = np.array(minibatch_new_q_values)
-        self.online_network.fit(minibatch_states, minibatch_new_q_values, verbose=False, epochs=1)
-        
-        
-    def update_target_network(self):
-        q_network_theta = self.online_network.get_weights()
-        target_network_theta = self.target_network.get_weights()
-        counter = 0
-        for q_weight, target_weight in zip(q_network_theta,target_network_theta):
-            target_weight = target_weight * (1-TAU) + q_weight * TAU
-            target_network_theta[counter] = target_weight
-            counter += 1
-        self.target_network.set_weights(target_network_theta)
-
-
-    def remember(self, state, action, reward, next_state, done):
-        if len(self.memory) <= AGENT_MEMORY_LIMIT:
-            experience = (state, action, reward, next_state, done)
-            self.memory.append(experience)
-                  
-                  
-    def update_epsilon(self):
-        self.epsilon = max(self.epsilon * EPSILON_DECAY, EPSILON_MIN)
-
-
-    def _reshape_state_for_net(self, state):
-        return np.reshape(state,(1, OBSERVATION_SPACE_DIMS))  
-
-
-def test_agent():
-    env = gym.make('CartPole-v0')
-    env.seed(1)
-    trials = []
-    NUMBER_OF_TRIALS=10
-    MAX_TRAINING_EPISODES = 2000
-    MAX_STEPS_PER_EPISODE = 200
-
-    for trial_index in range(NUMBER_OF_TRIALS):
-        agent = DoubleDQNAgent()
-        trial_episode_scores = []
-
-        for episode_index in range(1, MAX_TRAINING_EPISODES+1):
-            state = env.reset()
-            episode_score = 0
-
-            for _ in range(MAX_STEPS_PER_EPISODE):
-                action = agent.act(state)
-                next_state, reward, done, _ = env.step(action)
-                episode_score += reward
-                agent.remember(state, action, reward, next_state, done)
+                
+                # the key point of Double DQN
+                # selection of action is from model
+                # update is from target model
+                a = np.argmax(target_next[i])
+                target[i][action[i]] = reward[i] + self.discount_factor * (
+                    target_val[i][a])
+             
+            #train the neural network
+            self.model.fit(state,target,batch_size=self.batch_size,verbose=0)
+    def load(self,name):
+        self.model = load_model(name)
+    def run(self):
+        for e in range(self.EPISODES):
+            state = self.env.reset()
+            #reshape state for neural network input
+            state = np.reshape(state, [1, self.state_size])
+            done = False 
+            i = 0 
+            while not done :
+                self.env.render()
+                action = self.act(state)
+                next_state,reward,done,_=self.env.step(action)
+                #reshape next state
+                next_state = np.reshape(next_state, [1, self.state_size])
+                if not done or i ==self.env._max_episode_steps-1:
+                    reward = reward
+                else :
+                    reward = -100
+                self.remember(state, action, reward, next_state, done)
                 state = next_state
-                if len(agent.memory) > MIN_MEMORY_FOR_EXPERIENCE_REPLAY:
-                    agent.experience_replay()
-                    agent.update_target_network()
+                i+=1
+                if done:                   
+                    print("episode: {}/{}, score: {}, e: {:.2}".format(e, self.EPISODES, i, self.epsilon))
+                    if i == 500:
+                        print("Saving trained model as cartpole-dqn.h5")
+                        self.save("cartpole-dqn.h5")
+                        return
+                self.replay()
+    def test(self):
+        self.load("cartpole-dqn.h5")
+        for e in range(self.EPISODES):
+            state = self.env.reset()
+            state = np.reshape(state, [1, self.state_size])
+            done = False
+            i = 0
+            while not done:
+                self.env.render()
+                action = np.argmax(self.model.predict(state))
+                next_state, reward, done, _ = self.env.step(action)
+                state = np.reshape(next_state, [1, self.state_size])
+                i += 1
                 if done:
+                    print("episode: {}/{}, score: {}".format(e, self.EPISODES, i))
                     break
-            
-            trial_episode_scores.append(episode_score)
-            agent.update_epsilon()
-            last_100_avg = np.mean(trial_episode_scores[-100:])
-            print 'E %d scored %d, avg %.2f' % (episode_index, episode_score, last_100_avg)
-            if len(trial_episode_scores) >= 100 and last_100_avg >= 195.0:
-                print 'Trial %d solved in %d episodes!' % (trial_index, (episode_index - 100))
-                break
-        trials.append(np.array(trial_episode_scores))
-    return np.array(trials)
 
-
-
-def plot_trials(trials):
-    _, axis = plt.subplots()    
-
-    for i, trial in enumerate(trials):
-        steps_till_solve = trial.shape[0]-100
-        # stop trials at 2000 steps
-        if steps_till_solve < 1900:
-            bar_color = 'b'
-            bar_label = steps_till_solve
-        else:
-            bar_color = 'r'
-            bar_label = 'Stopped at 2000'
-        plt.bar(np.arange(i,i+1), steps_till_solve, 0.5, color=bar_color, align='center', alpha=0.5)
-        axis.text(i-.25, steps_till_solve + 20, bar_label, color=bar_color)
-
-    plt.ylabel('Episodes Till Solve')
-    plt.xlabel('Trial')
-    trial_labels = [str(i+1) for i in range(len(trials))]
-    plt.xticks(np.arange(len(trials)), trial_labels)
-    # remove y axis labels and ticks
-    axis.yaxis.set_major_formatter(plt.NullFormatter())
-    plt.tick_params(axis='both', left='off')
-
-    plt.title('Double DQN CartPole v-0 Trials')
-    plt.show()
-
-
-def plot_individual_trial(trial):
-    plt.plot(trial)
-    plt.ylabel('Steps in Episode')
-    plt.xlabel('Episode')
-    plt.title('Double DQN CartPole v-0 Steps in Select Trial')
-    plt.show()
-
-
-if __name__ == '__main__':
-    trials = test_agent()
-    # print 'Saving', file_name
-    # np.save('double_dqn_cartpole_trials.npy', trials)
-    # trials = np.load('double_dqn_cartpole_trials.npy')
-    plot_trials(trials)
-    plot_individual_trial(trials[1])
+if __name__ == "__main__":
+    agent = DQNagent()
+    agent.run()
+    #agent.test()
