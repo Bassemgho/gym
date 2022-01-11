@@ -10,7 +10,8 @@ from collections import deque
 from keras.models import Model,load_model
 from keras.layers import Input,Dense
 from keras.optimizers import adam_v2, rmsprop_v2 
-def modelDQN(input_shape,action_space):
+
+def modelDoubleDQN(input_shape,action_space):
     X_input = Input(input_shape)
     # Input Layer of state size(4) and Hidden Layer with 512 nodes
     layer = Dense(512,input_shape=input_shape,activation="relu",kernel_initializer="he_uniform")(X_input)
@@ -28,7 +29,7 @@ def modelDQN(input_shape,action_space):
     #model summary
     model.summary() 
     return model
-class DQNagent :
+class DoubleDQNagent :
     def __init__(self):
         self.env = gym.make("CartPole-v1")
         self.state_size = self.env.observation_space.shape[0]
@@ -123,12 +124,12 @@ class DQNagent :
                 if done:                   
                     print("episode: {}/{}, score: {}, e: {:.2}".format(e, self.EPISODES, i, self.epsilon))
                     if i == 500:
-                        print("Saving trained model as cartpole-dqn.h5")
-                        self.save("cartpole-dqn.h5")
+                        print("Saving trained model as cartpole-ddqn.h5")
+                        self.save("cartpole-ddqn.h5")
                         return
                 self.replay()
     def test(self):
-        self.load("cartpole-dqn.h5")
+        self.load("cartpole-ddqn.h5")
         for e in range(self.EPISODES):
             state = self.env.reset()
             state = np.reshape(state, [1, self.state_size])
@@ -145,6 +146,6 @@ class DQNagent :
                     break
 
 if __name__ == "__main__":
-    agent = DQNagent()
+    agent = DoubleDQNagent()
     agent.run()
     #agent.test()
