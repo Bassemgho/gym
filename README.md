@@ -8,21 +8,14 @@ It's The same environment as CartPole-v0
 
 ### Getting Started
 
-* Download the environment from one of the links below. You need only select the environment that matches your operating system:
+* Download the environment  from openAI gym site
 
-Linux
-Mac OSX:
-Windows (32-bit) 
-Windows (64-bit)
-(For Windows users) Check out this link if you need help with determining if your computer is running a 32-bit version or 64-bit version of the Windows operating system.
-
-(For AWS) If you'd like to train the agent on AWS (and have not enabled a virtual screen), then please use this link to obtain the environment.
 
 * Place the file in the root folder, and unzip (or decompress) the file.
 
 ```
-python doube_dqn.py
-python dqn.py
+python doube_dqn.py :to run the DDQN Algorithm
+python dqn.py :to run the DQN Algorithm
 ```
 
 ### Dependencies
@@ -48,8 +41,7 @@ target value than DQN. Namely its the following:
 
 
 ## Results and discussion
-DDQN seems to find the right solution irrespective of the initialization. See below an evolution of the score for one run:
-![screen shot 2017-09-19 at 1 43 23 am](https://user-images.githubusercontent.com/18519371/30569493-84f81002-9cdb-11e7-9d3a-e699c351f912.png)
+DDQN seems to find the right solution irrespective of the initialization. 
 
 
 ## Resources and links
