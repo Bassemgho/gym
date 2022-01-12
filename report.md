@@ -53,4 +53,5 @@ The agent was able to solve the environment after 560 episodes .
 # Ideas for Future Work
 We still can improve our results by: 
 * Implementing Dueling DQN
-* Tuning the hyperparameters
+* Tuning the hyper parameters: we can alter alpha, gamma, batch size, and episode length to see what differences the algorithm returns.
+* Training End: we can also change the line where we only check the last runs before switching to testing mode (if len(rewards) > n and np.average(rewards[-n:]) > 195:) as that doesn't prove it was solved. 
