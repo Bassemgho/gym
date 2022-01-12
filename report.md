@@ -1,19 +1,17 @@
 # Introduction
-In this project, we aim to train the agent to navigate a virtual world in the environment that is similar to Unity's Banana Collector environment. 
+A CartPole-v0 is a simple playground provided by OpenAI to train and test Reinforcement Learning algorithms. The agent is the cart, which is controlled by two possible actions +1, -1 pointing on moving left or right. The reward +1 is given at every timestep if the pole remains upright. The goal is to prevent the pole from falling over(maximize total reward). After 100 consecutive timesteps and an average reward of 195, the problem is considered as solved. The episode ends when the pole is more than 15 degrees from vertical, or the cart moves more than 2.4 units from the center
 
-A reward of +1 is provided for collecting a yellow banana, and a reward of -1 is provided for collecting a blue banana. Thus, the goal of your agent is to collect as many yellow bananas as possible while avoiding blue bananas.
+agent is performing an action, and as a result of it the environment is giving back the information about the state and reward. Our environment consists of four possible states, corresponding to:
 
-The state space has 37 dimensions and contains the agent's velocity, along with ray-based perception of objects around agent's forward direction. Given this information, the agent has to learn how to best select actions. Four discrete actions are available, corresponding to:
+0 - cart position.
 
-0 - move forward.
+1 - cart velocity.
 
-1 - move backward.
+2 - pole angle.
 
-2 - turn left.
+3 - pole angular velocity.
 
-3 - turn right.
-
-The task is episodic, and in order to solve the environment, the agent must get an average score of +13 over 100 consecutive episodes.
+and two possible actions [left, right]. The task is episodic, and in order to solve the environment, the agent must get an average score of +13 over 100 consecutive episodes.
 
 # Learning Algorithm
 The deep Q-learning came to solve problems with huge space state that the Q-learning is not able to solve. The deep Q-network takes as input the state and outputs Q-values for each possible action in the current state. The biggest q-value corresponds to the best action. We implemented the Double Deep DQN which is an improved version of DQN using the:
@@ -25,7 +23,6 @@ We chose to train our agent using Double DQn because it came to solve the proble
 
 * The Q-network: selects the best action with maximum Q-value of next state.
 * The target Q-network: calculates the estimated Q-value the best action selected. 
-![Image of Yaktocat](https://github.com/sabrinekr/navigation-dqn/blob/main/images/algorithm.png?raw=true)
 
 # Model architecture
 The DQN agent has a target and local networks having the same architecture:
@@ -50,8 +47,7 @@ When we reach the score of 13 we stop the training of our agent.
 
 The agent was able to solve the environment after 514 episodes with the average score of 13.08 during the last 100 episodes.
 
-![Image of Yaktocat](https://github.com/sabrinekr/navigation-dqn/blob/main/images/dqn1.PNG?raw=true)
-![Image of Yaktocat](https://github.com/sabrinekr/navigation-dqn/blob/main/images/dqn2.PNG?raw=true)
+
 
 # Ideas for Future Work
 We still can improve our results by: 
