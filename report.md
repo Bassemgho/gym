@@ -54,14 +54,14 @@ Red: This is the "solved" line at 195
 Blue: This is the reward for each episode
 Green: This is the value of epsilon scaled by 200
 Yellow: This is where the tests started.
-##DQN
+## DQN
 
 ![DQN](https://user-images.githubusercontent.com/63970415/149209698-9641e0f5-e7e9-489b-bbd1-37b1da99136a.png)
-##DDQN
+## DDQN
 
 ![ddqn](https://user-images.githubusercontent.com/63970415/149210052-86f98624-c883-47dd-b24b-d41b47fcbaee.png)
 
-###we couldn't finish all the training because the PC couldn't support and it crashed in the middle of training bt we tried to have these two visuals for explanation of the result
+## we couldn't finish all the training because the PC couldn't support and it crashed in the middle of training bt we tried to have these two visuals for explanation of the result
 # Ideas for Future Work
 We still can improve our results by: 
 * Implementing Dueling DQN
