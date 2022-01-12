@@ -48,7 +48,7 @@ For each episode, we start by giving the initial state of our environment to the
 
 The agent was able to solve the environment after 560 episodes .
 
-
+![DQN](https://user-images.githubusercontent.com/63970415/149209698-9641e0f5-e7e9-489b-bbd1-37b1da99136a.png)
 
 # Ideas for Future Work
 We still can improve our results by: 
