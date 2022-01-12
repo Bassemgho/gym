@@ -26,31 +26,31 @@ We chose to train our agent using Double DQn because it came to solve the proble
 
 # Model architecture
 The DQN agent has a target and local networks having the same architecture:
+* 1 input layer of size 4.
+* 1 fully connected layer of size 512.
+* 1 fully connected layer of size 256.
 * 1 fully connected layer of size 64.
-* 1 fully connected layer of size 64.
-* 1 output layer of size 4 (the size of the action space) 
+* 1 fully connected layer of size 2.
 
 # Hyperparameters 
 Our agent was trained using the follwing hyperparameters: 
-* Buffer size: the size of the experience replay buffer is 100 000
+* Buffer size: the size of the experience replay buffer is 2000
 * Batch size: the batch size of the training is 64 
-* Gamma: the discount factor 0.99
-* TAU learning rate coefficient for soft update of target parameters is 0.001
+* Gamma: the discount factor 0.95
+* epsilon is 0.01
 * The agent is updated after every 4 time steps
 
 # How to train our agent
 For each episode, we start by giving the initial state of our environment to the agent. Then, for each time step we give our agent the current state of our environment and he will return the action that he will perform. After performing this action, the environment will return the new state, the reward and if the game is finished or not. The agent will save this experience in the replay buffer. 
 
-When we reach the score of 13 we stop the training of our agent. 
 
 # Results
 
-The agent was able to solve the environment after 514 episodes with the average score of 13.08 during the last 100 episodes.
+The agent was able to solve the environment after 560 episodes .
 
 
 
 # Ideas for Future Work
 We still can improve our results by: 
 * Implementing Dueling DQN
-* Implementing the prioritized experience replay
 * Tuning the hyperparameters
