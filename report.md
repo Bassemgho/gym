@@ -38,7 +38,7 @@ Our agent was trained using the follwing hyperparameters:
 * Batch size: the batch size of the training is 64 
 * Gamma: the discount factor 0.95
 * epsilon is 0.01
-* The agent is updated after every 4 time steps
+* The agent is updated after every time step
 
 # How to train our agent
 For each episode, we start by giving the initial state of our environment to the agent. Then, for each time step we give our agent the current state of our environment and he will return the action that he will perform. After performing this action, the environment will return the new state, the reward and if the game is finished or not. The agent will save this experience in the replay buffer. 
