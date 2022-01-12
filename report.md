@@ -61,7 +61,7 @@ Yellow: This is where the tests started.
 
 ![ddqn](https://user-images.githubusercontent.com/63970415/149210052-86f98624-c883-47dd-b24b-d41b47fcbaee.png)
 
-## we couldn't finish all the training because the PC couldn't support and it crashed in the middle of training bt we tried to have these two visuals for explanation of the result
+###### we couldn't finish all the training because the PC couldn't support and it crashed in the middle of training bt we tried to have these two visuals for explanation of the result
 # Ideas for Future Work
 We still can improve our results by: 
 * Implementing Dueling DQN
